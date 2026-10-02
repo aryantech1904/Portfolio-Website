@@ -1,198 +1,169 @@
 /* ==========================
-   AOS INITIALIZATION
+   PORTFOLIO INITIALIZATION
 ========================== */
 
-AOS.init({
-    duration: 1000,
-    once: true
-});
+document.addEventListener("DOMContentLoaded", () => {
 
+    /* ==========================
+       AOS INITIALIZATION
+    ========================== */
 
-/* ==========================
-   TYPING ANIMATION
-========================== */
-
-const roles = [
-
-    "Aspiring Full Stack Developer",
-
-    "Future Software Engineer",
-
-    "AI Engineer",
-
-    "Generative AI Enthusiast",
-
-    "React & Node.js Learner"
-
-];
-
-let roleIndex = 0;
-let charIndex = 0;
-let currentRole = "";
-let currentChar = "";
-
-function typeEffect() {
-
-    if (roleIndex >= roles.length) {
-        roleIndex = 0;
+    if (typeof AOS !== "undefined") {
+        AOS.init({
+            duration: 800,
+            once: true,
+            offset: 100
+        });
     }
 
-    currentRole = roles[roleIndex];
 
-    currentChar = currentRole.slice(0, ++charIndex);
+    /* ==========================
+       TYPING ANIMATION
+    ========================== */
 
-    document.getElementById("typing").textContent = currentChar;
+    const typingElement = document.getElementById("typing");
 
-    if (currentChar.length === currentRole.length) {
+    const roles = [
+        "Aspiring Full Stack Developer",
+        "Future Software Engineer",
+        "AI Engineer",
+        "Generative AI Enthusiast",
+        "React & Node.js Learner"
+    ];
 
-        setTimeout(() => {
+    if (
+        typingElement &&
+        !window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    ) {
+        let roleIndex = 0;
+        let charIndex = 0;
+        let isDeleting = false;
 
-            eraseEffect();
+        function typeEffect() {
+            const currentRole = roles[roleIndex];
 
-        }, 1500);
+            if (isDeleting) {
+                charIndex--;
+            } else {
+                charIndex++;
+            }
 
-        return;
+            typingElement.textContent =
+                currentRole.substring(0, charIndex);
+
+            let delay = isDeleting ? 45 : 90;
+
+            if (!isDeleting && charIndex === currentRole.length) {
+                isDeleting = true;
+                delay = 1500;
+            } else if (isDeleting && charIndex === 0) {
+                isDeleting = false;
+                roleIndex = (roleIndex + 1) % roles.length;
+                delay = 350;
+            }
+
+            setTimeout(typeEffect, delay);
+        }
+
+        typeEffect();
     }
 
-    setTimeout(typeEffect, 100);
-}
 
-
-function eraseEffect() {
-
-    currentRole = roles[roleIndex];
-
-    currentChar = currentRole.slice(0, --charIndex);
-
-    document.getElementById("typing").textContent = currentChar;
-
-    if (charIndex === 0) {
-
-        roleIndex++;
-
-        setTimeout(typeEffect, 300);
-
-        return;
-    }
-
-    setTimeout(eraseEffect, 50);
-}
-
-typeEffect();
-
-
-/* ==========================
-   NAVBAR BACKGROUND EFFECT
-========================== */
-
-window.addEventListener("scroll", () => {
+    /* ==========================
+       NAVBAR SCROLL EFFECT
+    ========================== */
 
     const navbar = document.querySelector("nav");
 
-    if (window.scrollY > 50) {
+    function updateNavbar() {
+        if (!navbar) return;
 
-        navbar.style.background =
-            "rgba(10,15,31,0.98)";
-
-        navbar.style.boxShadow =
-            "0 5px 20px rgba(0,0,0,0.4)";
-
-    } else {
-
-        navbar.style.background =
-            "rgba(10,15,31,0.9)";
-
-        navbar.style.boxShadow = "none";
+        if (window.scrollY > 50) {
+            navbar.style.background = "rgba(10, 15, 31, 0.98)";
+            navbar.style.boxShadow = "0 5px 20px rgba(0, 0, 0, 0.4)";
+        } else {
+            navbar.style.background = "rgba(10, 15, 31, 0.9)";
+            navbar.style.boxShadow = "none";
+        }
     }
 
+    window.addEventListener("scroll", updateNavbar, {
+        passive: true
+    });
+
+    updateNavbar();
+
+
+    /* ==========================
+       ACTIVE NAVIGATION
+    ========================== */
+
+    const sections = document.querySelectorAll("section[id]");
+    const navLinks = document.querySelectorAll("nav ul li a");
+
+    function updateActiveNavigation() {
+        let currentSection = "";
+
+        sections.forEach(section => {
+            const sectionTop =
+                section.getBoundingClientRect().top + window.scrollY;
+
+            if (window.scrollY >= sectionTop - 200) {
+                currentSection = section.id;
+            }
+        });
+
+        navLinks.forEach(link => {
+            const isActive =
+                link.getAttribute("href") === "#" + currentSection;
+
+            link.classList.toggle("active", isActive);
+
+            if (isActive) {
+                link.setAttribute("aria-current", "location");
+            } else {
+                link.removeAttribute("aria-current");
+            }
+        });
+    }
+
+    window.addEventListener("scroll", updateActiveNavigation, {
+        passive: true
+    });
+
+    updateActiveNavigation();
+
+
+    /* ==========================
+       CARD HOVER EFFECTS
+    ========================== */
+
+    const cards = document.querySelectorAll(
+        ".skill-category, .cert-card"
+    );
+
+    cards.forEach(card => {
+        card.addEventListener("mouseenter", () => {
+            card.style.transform = "translateY(-10px) scale(1.03)";
+        });
+
+        card.addEventListener("mouseleave", () => {
+            card.style.transform = "";
+        });
+    });
+
+
+    /* ==========================
+       CONSOLE MESSAGE
+    ========================== */
+
+    console.log(
+        "%cWelcome Recruiter!",
+        "color:#38bdf8;font-size:22px;font-weight:bold;"
+    );
+
+    console.log(
+        "Portfolio developed by Aryan Raj Srivastava."
+    );
+
 });
-
-
-/* ==========================
-   ACTIVE NAVIGATION
-========================== */
-
-const sections =
-document.querySelectorAll("section");
-
-const navLinks =
-document.querySelectorAll("nav ul li a");
-
-window.addEventListener("scroll", () => {
-
-    let current = "";
-
-    sections.forEach(section => {
-
-        const sectionTop =
-            section.offsetTop;
-
-        const sectionHeight =
-            section.clientHeight;
-
-        if (
-            pageYOffset >=
-            sectionTop - 200
-        ) {
-
-            current = section.getAttribute("id");
-        }
-
-    });
-
-    navLinks.forEach(link => {
-
-        link.classList.remove("active");
-
-        if (
-            link.getAttribute("href")
-            === "#" + current
-        ) {
-
-            link.classList.add("active");
-        }
-
-    });
-
-});
-
-
-/* ==========================
-   REVEAL CARDS ON HOVER
-========================== */
-
-const cards =
-document.querySelectorAll(
-    ".skill-category, .cert-card"
-);
-
-cards.forEach(card => {
-
-    card.addEventListener("mouseenter", () => {
-
-        card.style.transform =
-            "translateY(-10px) scale(1.03)";
-
-    });
-
-    card.addEventListener("mouseleave", () => {
-
-        card.style.transform =
-            "translateY(0px) scale(1)";
-    });
-
-});
-
-
-/* ==========================
-   CONSOLE MESSAGE
-========================== */
-
-console.log(
-    "%cWelcome Recruiter 👋",
-    "color:#38bdf8;font-size:22px;font-weight:bold;"
-);
-
-console.log(
-    "Portfolio Developed by Aryan Raj Srivastava"
-);
